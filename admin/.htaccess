@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+ErrorDocument 404 /hureelearning/admin/404.php
+
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /(.*)index\.php($|\ |\?)
+RewriteRule ^ /%1 [R=301,L]
+</IfModule>

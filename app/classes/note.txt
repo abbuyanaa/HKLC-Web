@@ -1,0 +1,40 @@
+
+// Level Word Count
+SELECT wl.*,
+(
+SELECT COUNT(*) FROM words AS w 
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+WHERE kr.topic_id=1 AND w.level_id = wl.id
+) AS word_count
+FROM word_level AS wl
+
+
+// Level Words
+SELECT DISTINCT kr.id AS wordid, kr.kr_w,
+(
+SELECT GROUP_CONCAT(DISTINCT mn.mn_w SEPARATOR ', ') FROM words AS ws
+INNER JOIN mn_words AS mn ON mn.id = ws.mn_id
+WHERE ws.kr_id = kr.id
+) AS mn_w
+FROM words AS w 
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN word_level AS wl ON wl.id = w.level_id
+WHERE kr.topic_id = '1' AND w.level_id = '1'
+ORDER BY w.id DESC
+
+
+
+// Users
+INSERT INTO users(email, password) VALUES ()
+
+
+
+// Learn
+INSERT INTO learning(u_id, w_id) VALUES ()
+SELECT * FROM learning WHERE u_id='' AND w_id=''
+
+
+
+
+
+

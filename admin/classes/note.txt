@@ -1,0 +1,307 @@
+DELETE FROM words;
+ALTER TABLE words AUTO_INCREMENT = 1;
+DELETE FROM sentences;
+ALTER TABLE sentences AUTO_INCREMENT = 1;
+DELETE FROM mn_words;
+ALTER TABLE mn_words AUTO_INCREMENT = 1;
+DELETE FROM kr_words;
+ALTER TABLE kr_words AUTO_INCREMENT = 1;
+
+
+Admin Panel List
+
+---- Book
+Create
+Read
+Update
+Delete
+
+
+SELECT * FROM books 
+WHERE CONCAT(kr_name, mn_name) LIKE '%%'
+ORDER BY id DESC LIMIT 10
+
+SELECT * FROM books WHERE id = 0
+
+SELECT * FROM books WHERE kr_name = ''
+
+INSERT INTO books(kr_name, mn_name, image) VALUES ()
+
+UPDATE books SET kr_name = '', mn_name = '', image = '' WHERE id = 0
+
+DELETE FROM books WHERE id = 0
+
+
+
+---- Aimag
+Create
+Read
+Update
+Delete
+
+SELECT ai.*,
+(SELECT COUNT(*) FROM kr_words AS kr WHERE kr.aimag_id = ai.id) AS word_count
+FROM aimag AS ai ORDER BY ai.id DESC
+
+SELECT * FROM aimag WHERE id = 0
+
+SELECT * FROM aimag WHERE kr_name = '' AND mn_name = ''
+
+INSERT INTO aimag(kr_name, mn_name) VALUES ()
+
+UPDATE aimag SET kr_name = '',  mn_name = '' WHERE id = 0
+
+DELETE FROM aimag WHERE id = 0
+
+
+
+---- Topic
+Create
+Read
+Update
+Delete
+
+SELECT t.id, t.kr_name, t.mn_name,
+(SELECT COUNT(*) FROM kr_words AS kr WHERE kr.topic_id = t.id) AS word_count 
+FROM books AS b
+INNER JOIN topics AS t ON t.book_id = b.id
+WHERE b.id = 1 ORDER BY t.id DESC
+
+SELECT * FROM topics WHERE book_id = 0
+
+SELECT * FROM topics WHERE book_id = '' AND kr_name = ''
+
+SELECT * FROM topics WHERE id = 0
+
+INSERT INTO topics(book_id, kr_name, mn_name) VALUES ('',  '',  '')
+
+UPDATE topics SET kr_name = '',  mn_name = '' WHERE id = 0
+
+DELETE FROM topics WHERE id = 0
+
+
+
+
+
+
+
+
+
+// Learning
+SELECT l.id, l.datetime, kr.kr_w, mn.mn_w
+FROM words AS w
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN mn_words AS mn ON mn.id = w.mn_id
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+INNER JOIN learning AS l ON l.w_id = w.id
+INNER JOIN users AS u ON u.id = l.u_id
+WHERE kr.topic_id = 24
+
+
+SELECT w.id, kr.kr_w, mn.mn_w
+FROM words AS w
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN mn_words AS mn ON mn.id = w.mn_id
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+WHERE kr.topic_id = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Random Query
+SELECT * FROM test WHERE id NOT IN (1) ORDER BY rand()
+
+SELECT word.id, kr.name, mn.name FROM words AS word
+INNER JOIN kr_words AS kr ON kr.id = word.id
+INNER JOIN mn_words AS mn ON mn.id = word.id
+WHERE word.id NOT IN (1) ORDER BY rand()
+LIMIT 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////// Word \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+Insert check
+SELECT * FROM kr_words AS kr WHERE kr.book_id = '' AND kr.topic_id = '' AND kr.kr_w = ''
+
+SELECT kr.id AS kr_id, kr.book_id, kr.topic_id, kr.kr_w, kr.aimag_id,
+mn.id AS mn_id, mn.mn_w FROM kr_words AS kr
+INNER JOIN words AS w ON w.kr_id = kr.id
+INNER JOIN mn_words AS mn ON mn.id = kr.id
+WHERE kr.id = 1
+
+
+SELECT mn.id, kr.kr_w, mn.mn_w,
+b.kr_name AS bkr_name, t.kr_name AS tkr_name
+FROM words AS w
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN mn_words AS mn on mn.id = w.mn_id
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+ORDER BY mn.id DESC LIMIT 10
+
+
+INSERT INTO kr_words(book_id, topic_id, kr_w, aimag_id) VALUES ()
+
+// wordzasah.php
+UPDATE kr_words SET book_id = '', topic_id = '', kr_w = '', aimag_id = '' WHERE id = 0
+UPDATE mn_words SET mn_w = '' WHERE id = 0
+
+DELETE FROM kr_words WHERE id = 0
+
+SELECT kr.id, kr.kr_w, ai.mn_name,
+b.kr_name AS bkr_name, b.mn_name AS bmn_name,
+t.kr_name AS tkr_name, t.mn_name AS tmn_name FROM kr_words AS kr
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+INNER JOIN aimag as ai ON ai.id = kr.aimag_id
+ORDER BY kr.id DESC LIMIT 10
+
+SELECT * FROM kr_words WHERE book_id = '' AND topic_id = '' AND kr_w = ''
+
+// Current Word Sentences
+SELECT sen.* FROM sentences AS sen
+INNER JOIN mn_words AS mn ON mn.id = sen.mn_id
+INNER JOIN words AS w ON w.mn_id = mn.id
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+WHERE kr.id = '0'
+
+
+
+
+// wordlist.php
+SELECT kr.id, kr.kr_w, ai.mn_name,
+b.kr_name AS bkr_name, b.mn_name AS bmn_name,
+t.kr_name AS tkr_name, t.mn_name AS tmn_name,
+(
+SELECT GROUP_CONCAT(DISTINCT sen.sentences SEPARATOR ', ') 
+FROM sentences AS sen WHERE sen.mn_id = mn.id
+) AS sentences
+FROM kr_words AS kr
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+INNER JOIN aimag as ai ON ai.id = kr.aimag_id
+INNER JOIN words AS w ON w.kr_id = kr.id
+INNER JOIN mn_words AS mn ON mn.id = w.mn_id
+ORDER BY kr.id DESC LIMIT 10
+
+
+
+// wordlist.php Search Query
+SELECT kr.id AS kr_id, kr.kr_w, ai.kr_name AS ai_kr_name, ai.mn_name AS ai_mn_name, w.mn_id, mn.mn_w,
+b.kr_name AS bkr_name, b.mn_name AS bmn_name,
+t.kr_name AS tkr_name, t.mn_name AS tmn_name
+FROM kr_words AS kr
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+INNER JOIN aimag as ai ON ai.id = kr.aimag_id
+INNER JOIN words AS w ON w.kr_id = kr.id
+INNER JOIN mn_words AS mn ON mn.id = w.mn_id
+WHERE CONCAT(b.kr_name, b.mn_name, t.kr_name, t.mn_name, kr.kr_w, ai.kr_name, ai.mn_name, mn.mn_w) LIKE '%хайр%'
+ORDER BY kr.id DESC LIMIT 10
+
+
+
+
+
+
+
+//////////////////////////////////// WordTable Query
+SELECT kr.id, b.mn_name AS bmn_name, t.mn_name AS tmn_name, kr.kr_w, w.kr_sentences FROM words AS w
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+ORDER BY kr.id ASC LIMIT 4
+
+SELECT * FROM kr_words WHERE topic_id = 0
+
+
+/////////////////////////////////// Mongolia Word Query
+SELECT mn.id, mn.mn_w, w.kr_sentences,
+b.kr_name AS bkr_name, t.kr_name AS tkr_name
+FROM words AS w
+INNER JOIN kr_words AS kr ON kr.id = w.kr_id
+INNER JOIN mn_words AS mn on mn.id = w.mn_id
+INNER JOIN books AS b ON b.id = kr.book_id
+INNER JOIN topics AS t ON t.id = kr.topic_id
+ORDER BY mn.id DESC LIMIT 10
+
+INSERT INTO mn_words(mn_w) VALUES ('')
+
+
+
+
+
+/////////////////////////////////// Sentences
+
+INSERT INTO sentences(sentence, word_id) VALUES ()
+
+SELECT * FROM sentences WHERE sentence, word_id
+
+
+
+
+
+
+
+//////////////////////////////////// Quiz
+SELECT kr.* FROM books AS b 
+INNER JOIN krbook AS krb ON krb.book_id = b.id 
+INNER JOIN topics AS t ON krb.topic_id = t.id 
+INNER JOIN kr_words AS kr ON kr.krbook_id = krb.id 
+WHERE b.id = 1 AND t.id = 1 ORDER BY rand() LIMIT 20
+
+SELECT kr.id AS krid, kr.kr_w, 
+(
+SELECT GROUP_CONCAT(DISTINCT mn.mn_w SEPARATOR ', ') FROM mn_words AS mn 
+INNER JOIN words AS w ON w.mn_word = mn.id 
+WHERE w.kr_word = kr.id AND mn.id = w.mn_word
+) AS mn_w
+FROM books AS b 
+INNER JOIN krbook AS krb ON krb.book_id = b.id 
+INNER JOIN topics AS t ON krb.topic_id = t.id 
+INNER JOIN kr_words AS kr ON kr.krbook_id = krb.id 
+WHERE b.id = '$bid' AND t.id = '$tid' ORDER BY rand() LIMIT 1
+
+
+
+
+
+
+
